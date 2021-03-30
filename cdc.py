@@ -1,12 +1,12 @@
 #!/bin/env python
 
 import argparse
-from enum import IntEnum
 import os
 import sqlite3
 import sys
-import pyexcel_ods3 as py_ods
+from enum import IntEnum
 from collections import OrderedDict
+import pyexcel_ods3 as py_ods
 
 
 class ChordTone:
@@ -518,7 +518,8 @@ def build_sqlite_database(*, output_file, chord_dictionary=None,
         sqlite_database.build(sql_document)
 
 
-def main():
+# FIXME: Too complex?
+def main():  # noqa
     parser = argparse.ArgumentParser(description='Chord Dictionary Creator')
     parser.add_argument('-i', '--input', type=str, required=True,
                         help='Input file (ODS, SQL, SQLITE)')

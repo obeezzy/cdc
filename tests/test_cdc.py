@@ -5,6 +5,9 @@ import unittest
 import subprocess
 import shutil
 from cdc import SqlDocument, SqliteDatabase, ChordDictionary
+from tests.dummy_cdc import DummySqlDocument, \
+                            DummySqliteDatabase, \
+                            DummyChordDictionary
 
 
 class TestCdc(unittest.TestCase):
@@ -15,20 +18,31 @@ class TestCdc(unittest.TestCase):
         self.output_ods = 'tests/artifacts/chord_dictionary.ods'
         self.output_sql = 'tests/artifacts/chord_dictionary.sql'
         self.output_sqlite = 'tests/artifacts/chord_dictionary.db'
+        self.resource_dir = os.path.abspath('tests/resources')
         self.artifact_dir = os.path.abspath('tests/artifacts')
+
+        if not os.path.isdir(self.resource_dir):
+            os.makedirs(self.resource_dir)
+
+        self.dummy_chord_dictionary = DummyChordDictionary(self.input_ods)
+        self.dummy_sql_document = DummySqlDocument(self.input_sql)
+        self.dummy_sqlite_database = DummySqliteDatabase(self.input_sqlite)
+        with self.dummy_sqlite_database:
+            self.dummy_sqlite_database.build(self.dummy_sql_document)
 
         if not os.path.isdir(self.artifact_dir):
             os.makedirs(self.artifact_dir)
 
     def tearDown(self):
+        if os.path.isdir(self.resource_dir):
+            shutil.rmtree(self.resource_dir)
         if os.path.isdir(self.artifact_dir):
             shutil.rmtree(self.artifact_dir)
 
     def test_ods_to_sql(self):
         completed_process = subprocess.run(['./cdc.py',
                                             '-i', self.input_ods,
-                                            '-o', self.output_sql],
-                                           check=False)
+                                            '-o', self.output_sql])
         self.assertEqual(completed_process.returncode, 0,
                          'Failed to convert ODS to SQL.')
         self.assertTrue(os.path.isfile(self.output_sql),
